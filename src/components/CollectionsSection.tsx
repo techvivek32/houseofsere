@@ -1,35 +1,6 @@
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { MessageCircle, Instagram } from "lucide-react";
-
-// Import product images
-import goldenSharara from "@/assets/products/golden-sharara.jpg";
-import maroonLehenga from "@/assets/products/maroon-lehenga.jpg";
-import whiteAnarkali from "@/assets/products/white-anarkali.jpg";
-import maroonJacketLehenga from "@/assets/products/maroon-jacket-lehenga.jpg";
-import blueSharara from "@/assets/products/blue-sharara.jpg";
-import purpleLehenga from "@/assets/products/purple-lehenga.jpg";
-import greenGown from "@/assets/products/green-gown.jpg";
-import bridalLehenga from "@/assets/products/bridal-lehenga.jpg";
-import blackAnarkali from "@/assets/products/black-anarkali.jpg";
-import plumVelvetSaree from "@/assets/products/plum-velvet-saree.jpg";
-import skyBlueFloralLehenga from "@/assets/products/sky-blue-floral-lehenga.jpg";
-import redShararaSet from "@/assets/products/red-sharara-set.jpg";
-import lavenderFloralLehenga from "@/assets/products/lavender-floral-lehenga.jpg";
-import maroonBridalSharara from "@/assets/products/maroon-bridal-sharara.jpg";
-import royalBlueBandhani from "@/assets/products/royal-blue-bandhani.jpg";
-import goldenBridalLehenga from "@/assets/products/golden-bridal-lehenga.jpg";
-import blueBandhaniSuit from "@/assets/products/blue-bandhani-suit.jpg";
-import orangeFloralLehenga from "@/assets/products/orange-floral-lehenga.jpg";
-import orangeFloralGown from "@/assets/products/orange-floral-gown.png";
-import purpleVelvetSaree from "@/assets/products/purple-velvet-saree.png";
-import goldenSequinLehenga from "@/assets/products/golden-sequin-lehenga.png";
-import coralFloralLehenga from "@/assets/products/coral-floral-lehenga.png";
-import pinkEmbroideredLehenga from "@/assets/products/product-5.png";
-import tealSilkGown from "@/assets/products/product-6.png";
-import roseGoldLehenga from "@/assets/products/product-7.png";
-import ivoryBridalLehenga from "@/assets/products/product-8.png";
-import emeraldGreenSaree from "@/assets/products/product-9.png";
 
 const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=7096748749";
 const INSTAGRAM_URL = "https://www.instagram.com/house_ofsere/";
@@ -39,174 +10,26 @@ const getWhatsAppLink = (productTitle: string) => {
   return `${WHATSAPP_URL}&text=${text}`;
 };
 
-const products = [
-  {
-    id: 1,
-    title: "Plum Velvet Saree",
-    category: "Saree",
-    image: plumVelvetSaree,
-  },
-  {
-    id: 2,
-    title: "Sky Blue Floral Lehenga",
-    category: "Lehenga",
-    image: skyBlueFloralLehenga,
-  },
-  {
-    id: 3,
-    title: "Red Georgette Sharara Set",
-    category: "Sharara",
-    image: redShararaSet,
-  },
-  {
-    id: 4,
-    title: "Lavender Floral Lehenga",
-    category: "Lehenga",
-    image: lavenderFloralLehenga,
-  },
-  {
-    id: 5,
-    title: "Maroon Bridal Sharara",
-    category: "Bridal",
-    image: maroonBridalSharara,
-  },
-  {
-    id: 6,
-    title: "Royal Blue Bandhani Suit",
-    category: "Suit",
-    image: royalBlueBandhani,
-  },
-  {
-    id: 7,
-    title: "Golden Bridal Lehenga",
-    category: "Bridal",
-    image: goldenBridalLehenga,
-  },
-  {
-    id: 8,
-    title: "Blue Bandhani Kurta Set",
-    category: "Suit",
-    image: blueBandhaniSuit,
-  },
-  {
-    id: 9,
-    title: "Orange Floral Lehenga",
-    category: "Lehenga",
-    image: orangeFloralLehenga,
-  },
-  {
-    id: 10,
-    title: "Golden Sharara Set",
-    category: "Sharara",
-    image: goldenSharara,
-  },
-  {
-    id: 11,
-    title: "Maroon Designer Lehenga",
-    category: "Lehenga",
-    image: maroonLehenga,
-  },
-  {
-    id: 12,
-    title: "White Anarkali with Dupatta",
-    category: "Anarkali",
-    image: whiteAnarkali,
-  },
-  {
-    id: 13,
-    title: "Maroon Jacket Lehenga",
-    category: "Lehenga",
-    image: maroonJacketLehenga,
-  },
-  {
-    id: 14,
-    title: "Royal Blue Sharara",
-    category: "Sharara",
-    image: blueSharara,
-  },
-  {
-    id: 15,
-    title: "Purple Bridal Lehenga",
-    category: "Lehenga",
-    image: purpleLehenga,
-  },
-  {
-    id: 16,
-    title: "Lime Green Gown",
-    category: "Gown",
-    image: greenGown,
-  },
-  {
-    id: 17,
-    title: "Bridal Maroon Lehenga",
-    category: "Bridal",
-    image: bridalLehenga,
-  },
-  {
-    id: 18,
-    title: "Black Anarkali with Gold",
-    category: "Anarkali",
-    image: blackAnarkali,
-  },
-  {
-    id: 19,
-    title: "Orange Floral Gown",
-    category: "Gown",
-    image: orangeFloralGown,
-  },
-  {
-    id: 20,
-    title: "Purple Velvet Saree",
-    category: "Saree",
-    image: purpleVelvetSaree,
-  },
-  {
-    id: 21,
-    title: "Golden Sequin Lehenga",
-    category: "Lehenga",
-    image: goldenSequinLehenga,
-  },
-  {
-    id: 22,
-    title: "Coral Floral Lehenga",
-    category: "Lehenga",
-    image: coralFloralLehenga,
-  },
-  {
-    id: 23,
-    title: "Pink Embroidered Lehenga",
-    category: "Lehenga",
-    image: pinkEmbroideredLehenga,
-  },
-  {
-    id: 24,
-    title: "Teal Silk Gown",
-    category: "Gown",
-    image: tealSilkGown,
-  },
-  {
-    id: 25,
-    title: "Rose Gold Lehenga",
-    category: "Lehenga",
-    image: roseGoldLehenga,
-  },
-  {
-    id: 26,
-    title: "Ivory Bridal Lehenga",
-    category: "Bridal",
-    image: ivoryBridalLehenga,
-  },
-  {
-    id: 27,
-    title: "Emerald Green Saree",
-    category: "Saree",
-    image: emeraldGreenSaree,
-  },
-];
-
 const CollectionsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/products');
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   return (
     <section id="collections" className="section-padding bg-background" ref={ref}>
@@ -236,7 +59,7 @@ const CollectionsSection = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {products.map((product, index) => (
             <motion.div
-              key={product.id}
+              key={product._id}
               initial={{ opacity: 0, y: 40 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.1 + index * 0.03 }}
@@ -244,7 +67,7 @@ const CollectionsSection = () => {
             >
               <div className="aspect-[3/4] overflow-hidden bg-muted">
                 <img
-                  src={product.image}
+                  src={product.imageUrl || '/placeholder.svg'}
                   alt={product.title}
                   className="w-full h-full object-cover hq-image transition-transform duration-700 group-hover:scale-105"
                   loading="lazy"
