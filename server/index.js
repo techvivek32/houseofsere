@@ -100,6 +100,75 @@ app.get('/api/admin/verify', verifyToken, (req, res) => {
   res.json({ message: 'Token valid' });
 });
 
+// Categories routes
+app.post('/api/categories/bulk', async (req, res) => {
+  try {
+    const { categories: categoryNames } = req.body;
+    
+    if (!categoryNames || !Array.isArray(categoryNames) || categoryNames.length === 0) {
+      return res.status(400).json({ message: 'Categories array is required' });
+    }
+    
+    const categories = db.collection('categories');
+    const categoriesToInsert = [];
+    
+    for (const name of categoryNames) {
+      const trimmedName = name.trim();
+      if (trimmedName) {
+        const existing = await categories.findOne({ name: trimmedName });
+        if (!existing) {
+          categoriesToInsert.push({
+            name: trimmedName,
+            createdAt: new Date()
+          });
+        }
+      }
+    }
+    
+    if (categoriesToInsert.length > 0) {
+      await categories.insertMany(categoriesToInsert);
+    }
+    
+    res.status(201).json({ 
+      message: `${categoriesToInsert.length} categories saved successfully`,
+      savedCount: categoriesToInsert.length
+    });
+  } catch (error) {
+    console.error('Bulk category creation error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.get('/api/categories', async (req, res) => {
+  try {
+    const categories = db.collection('categories');
+    const result = await categories.find({}).toArray();
+    res.json(result);
+  } catch (error) {
+    console.error('Categories fetch error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.delete('/api/categories/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ObjectId } = await import('mongodb');
+    const categories = db.collection('categories');
+    
+    const result = await categories.deleteOne({ _id: new ObjectId(id) });
+    
+    if (result.deletedCount === 1) {
+      res.json({ message: 'Category deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'Category not found' });
+    }
+  } catch (error) {
+    console.error('Category deletion error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Start server
 connectDB().then(() => {
   app.listen(PORT, () => {

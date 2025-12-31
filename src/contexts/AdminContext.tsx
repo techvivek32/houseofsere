@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface AdminContextType {
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
@@ -18,11 +19,33 @@ export const useAdmin = () => {
 
 export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (token) {
-      setIsAuthenticated(true);
+      // Verify token with server
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/admin/verify`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+      .then(response => {
+        if (response.ok) {
+          setIsAuthenticated(true);
+        } else {
+          localStorage.removeItem('adminToken');
+          setIsAuthenticated(false);
+        }
+        setIsLoading(false);
+      })
+      .catch(() => {
+        localStorage.removeItem('adminToken');
+        setIsAuthenticated(false);
+        setIsLoading(false);
+      });
+    } else {
+      setIsLoading(false);
     }
   }, []);
 
@@ -55,7 +78,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <AdminContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AdminContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
       {children}
     </AdminContext.Provider>
   );
