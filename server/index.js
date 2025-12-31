@@ -230,6 +230,43 @@ app.delete('/api/products/:id', async (req, res) => {
   }
 });
 
+app.put('/api/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, category, price, imageUrl, description } = req.body;
+    const { ObjectId } = await import('mongodb');
+    
+    if (!title || !category || !price) {
+      return res.status(400).json({ message: 'Title, category, and price are required' });
+    }
+    
+    const products = db.collection('products');
+    
+    const result = await products.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          title,
+          category,
+          price,
+          imageUrl: imageUrl || '',
+          description: description || '',
+          updatedAt: new Date()
+        }
+      }
+    );
+    
+    if (result.matchedCount === 1) {
+      res.json({ message: 'Product updated successfully' });
+    } else {
+      res.status(404).json({ message: 'Product not found' });
+    }
+  } catch (error) {
+    console.error('Product update error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Start server
 connectDB().then(() => {
   app.listen(PORT, () => {

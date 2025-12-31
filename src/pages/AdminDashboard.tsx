@@ -457,7 +457,7 @@ const AdminDashboard = () => {
                 onClick={handleSaveProduct}
                 className="w-full bg-amber-600 hover:bg-amber-700 text-white"
               >
-                Add Product
+                {editingProduct ? 'Update Product' : 'Add Product'}
               </Button>
             </div>
           </div>
