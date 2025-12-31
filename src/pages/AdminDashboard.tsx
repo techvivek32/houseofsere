@@ -4,12 +4,23 @@ import { useAdmin } from '@/contexts/AdminContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { LogOut, Plus, Trash2 } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { LogOut, Plus, Trash2, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminDashboard = () => {
   const [categories, setCategories] = useState(['']);
   const [savedCategories, setSavedCategories] = useState([]);
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [productForm, setProductForm] = useState({
+    title: '',
+    category: '',
+    price: '',
+    image: null,
+    imageUrl: '',
+    description: ''
+  });
   const { logout } = useAdmin();
   const navigate = useNavigate();
 
@@ -97,8 +108,55 @@ const AdminDashboard = () => {
   };
 
   const handleAddProduct = () => {
-    // In a real app, this would open a product form
-    toast.info('Add Product functionality would be implemented here');
+    setShowProductForm(true);
+  };
+
+  const handleCloseProductForm = () => {
+    setShowProductForm(false);
+    setProductForm({
+      title: '',
+      category: '',
+      price: '',
+      image: null,
+      imageUrl: '',
+      description: ''
+    });
+  };
+
+  const handleProductFormChange = (field: string, value: any) => {
+    setProductForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveProduct = async () => {
+    if (!productForm.title || !productForm.category || !productForm.price) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:8080/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: productForm.title,
+          category: productForm.category,
+          price: productForm.price,
+          imageUrl: productForm.imageUrl,
+          description: productForm.description
+        }),
+      });
+      
+      if (response.ok) {
+        toast.success('Product added successfully');
+        handleCloseProductForm();
+      } else {
+        toast.error('Failed to add product');
+      }
+    } catch (error) {
+      toast.error('Error adding product');
+    }
   };
 
   return (
@@ -209,8 +267,84 @@ const AdminDashboard = () => {
               </div>
             </CardContent>
           </Card>
-        )}
-      </div>
+        )}      </div>
+
+      {/* Product Form Modal */}
+      {showProductForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Add New Product</h2>
+              <Button
+                onClick={handleCloseProductForm}
+                variant="ghost"
+                size="sm"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              <Input
+                placeholder="Product Title"
+                value={productForm.title}
+                onChange={(e) => handleProductFormChange('title', e.target.value)}
+              />
+              
+              <Select
+                value={productForm.category}
+                onValueChange={(value) => handleProductFormChange('category', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {savedCategories.map((category: any) => (
+                    <SelectItem key={category._id} value={category.name}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              <Input
+                placeholder="Price (e.g., ₹25,000 or Inquire)"
+                value={productForm.price}
+                onChange={(e) => handleProductFormChange('price', e.target.value)}
+              />
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">Product Image</label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleProductFormChange('image', e.target.files?.[0])}
+                  className="mb-2"
+                />
+                <Input
+                  placeholder="Or paste image URL"
+                  value={productForm.imageUrl}
+                  onChange={(e) => handleProductFormChange('imageUrl', e.target.value)}
+                />
+              </div>
+              
+              <Textarea
+                placeholder="Description (optional)"
+                value={productForm.description}
+                onChange={(e) => handleProductFormChange('description', e.target.value)}
+                rows={3}
+              />
+              
+              <Button
+                onClick={handleSaveProduct}
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+              >
+                Add Product
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

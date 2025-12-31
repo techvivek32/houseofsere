@@ -169,6 +169,36 @@ app.delete('/api/categories/:id', async (req, res) => {
   }
 });
 
+// Products routes
+app.post('/api/products', async (req, res) => {
+  try {
+    const { title, category, price, imageUrl, description } = req.body;
+    
+    if (!title || !category || !price) {
+      return res.status(400).json({ message: 'Title, category, and price are required' });
+    }
+    
+    const products = db.collection('products');
+    
+    const result = await products.insertOne({
+      title,
+      category,
+      price,
+      imageUrl: imageUrl || '',
+      description: description || '',
+      createdAt: new Date()
+    });
+    
+    res.status(201).json({ 
+      message: 'Product created successfully',
+      productId: result.insertedId 
+    });
+  } catch (error) {
+    console.error('Product creation error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Start server
 connectDB().then(() => {
   app.listen(PORT, () => {
