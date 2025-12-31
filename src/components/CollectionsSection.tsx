@@ -88,7 +88,10 @@ const CollectionsSection = () => {
               
               {/* Content - always visible on mobile, hover on desktop */}
               <div className="absolute bottom-0 left-0 right-0 p-4 text-primary-foreground transform translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-500">
-                <h3 className="font-serif text-lg mb-3">{product.title}</h3>
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-serif text-lg">{product.title}</h3>
+                  <span className="text-sm font-medium bg-primary/20 px-2 py-1 rounded">Price: {product.price}</span>
+                </div>
                 <div className="flex gap-2">
                   <a
                     href={getWhatsAppLink(product.title)}
