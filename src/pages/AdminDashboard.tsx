@@ -257,6 +257,60 @@ const AdminDashboard = () => {
           </Button>
         </div>
 
+        {/* Saved Products Section */}
+        {savedProducts.length > 0 && (
+          <Card className="w-full mb-6">
+            <CardHeader>
+              <CardTitle className="text-lg font-medium">Saved Products ({savedProducts.length})</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {savedProducts.map((product: any) => (
+                  <div key={product._id} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="w-full h-32 bg-gray-200 rounded mb-3 flex items-center justify-center overflow-hidden">
+                      {product.imageUrl ? (
+                        <img 
+                          src={product.imageUrl} 
+                          alt={product.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-gray-400 text-sm">No Image</span>
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-lg mb-2">{product.title}</h3>
+                    <p className="text-sm text-gray-600 mb-1">Category: {product.category}</p>
+                    <p className="text-sm text-gray-600 mb-2">Price: {product.price}</p>
+                    {product.description && (
+                      <p className="text-sm text-gray-500 mb-3">{product.description}</p>
+                    )}
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() => handleEditProduct(product)}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                      >
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteProduct(product._id)}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Categories Section */}
         <Card className="w-full max-w-2xl">
           <CardHeader>
@@ -326,60 +380,6 @@ const AdminDashboard = () => {
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Saved Products Section */}
-        {savedProducts.length > 0 && (
-          <Card className="w-full max-w-4xl mt-6">
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">Saved Products ({savedProducts.length})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {savedProducts.map((product: any) => (
-                  <div key={product._id} className="border rounded-lg p-4 bg-gray-50">
-                    <div className="w-full h-32 bg-gray-200 rounded mb-3 flex items-center justify-center overflow-hidden">
-                      {product.imageUrl ? (
-                        <img 
-                          src={product.imageUrl} 
-                          alt={product.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-gray-400 text-sm">No Image</span>
-                      )}
-                    </div>
-                    <h3 className="font-semibold text-lg mb-2">{product.title}</h3>
-                    <p className="text-sm text-gray-600 mb-1">Category: {product.category}</p>
-                    <p className="text-sm text-gray-600 mb-2">Price: {product.price}</p>
-                    {product.description && (
-                      <p className="text-sm text-gray-500 mb-3">{product.description}</p>
-                    )}
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleEditProduct(product)}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                      <Button
-                        onClick={() => handleDeleteProduct(product._id)}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
-                    </div>
                   </div>
                 ))}
               </div>
