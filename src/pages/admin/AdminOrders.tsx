@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Trash2, User, Package, MapPin } from 'lucide-react';
+import { Trash2, User, Package, MapPin, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminOrders = () => {
