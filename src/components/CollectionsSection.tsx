@@ -24,7 +24,7 @@ const CollectionsSection = () => {
       navigate('/login');
       return;
     }
-    navigate('/buy', { state: { product } });
+    navigate(`/buy/${product._id}`);
   };
 
   useEffect(() => {

@@ -13,6 +13,8 @@ import SignUp from "./pages/SignUp";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLogin from "./pages/AdminLogin";
 import Buy from "./pages/Buy";
+import Profile from "./pages/Profile";
+import MyOrders from "./pages/MyOrders";
 import AdminLayout from "@/components/AdminLayout";
 import AdminDashboardOverview from "./pages/admin/AdminDashboardOverview";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -36,7 +38,9 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<SignUp />} />
-                <Route path="/buy" element={<Buy />} />
+                <Route path="/buy/:productId" element={<Buy />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/my-orders" element={<MyOrders />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route 

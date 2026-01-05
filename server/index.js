@@ -157,6 +157,60 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+// Orders routes
+app.post('/api/orders', async (req, res) => {
+  try {
+    const { userId, product, address, paymentMethod, total } = req.body;
+    
+    if (!userId || !product || !address || !paymentMethod || !total) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+    
+    const orders = db.collection('orders');
+    
+    const result = await orders.insertOne({
+      userId,
+      product,
+      address,
+      paymentMethod,
+      total,
+      status: 'pending',
+      createdAt: new Date()
+    });
+    
+    res.status(201).json({ 
+      message: 'Order placed successfully',
+      orderId: result.insertedId 
+    });
+  } catch (error) {
+    console.error('Order creation error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.get('/api/orders', async (req, res) => {
+  try {
+    const orders = db.collection('orders');
+    const result = await orders.find({}).toArray();
+    res.json(result);
+  } catch (error) {
+    console.error('Orders fetch error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.get('/api/orders/user/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const orders = db.collection('orders');
+    const result = await orders.find({ userId }).toArray();
+    res.json(result);
+  } catch (error) {
+    console.error('User orders fetch error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // User signup route
 app.post('/api/users/signup', async (req, res) => {
   try {

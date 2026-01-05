@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,9 +12,10 @@ import { useUser } from '@/contexts/UserContext';
 
 const Buy = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { user } = useUser();
-  const product = location.state?.product;
+  const { productId } = useParams();
+  const { user, isLoading: userLoading } = useUser();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [address, setAddress] = useState({
     street: '',
@@ -27,35 +28,97 @@ const Buy = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (userLoading) return; // Wait for user context to load
+    
     if (!user) {
       navigate('/login');
       return;
     }
-    if (!product) {
+    if (productId) {
+      fetchProduct();
+    } else {
+      toast.error('Product not found');
       navigate('/');
-      return;
     }
-  }, [user, product, navigate]);
+  }, [user, userLoading, productId, navigate]);
+
+  const fetchProduct = async () => {
+    try {
+      const response = await fetch('/api/products');
+      if (response.ok) {
+        const products = await response.json();
+        const foundProduct = products.find((p: any) => p._id === productId);
+        if (foundProduct) {
+          setProduct(foundProduct);
+        } else {
+          toast.error('Product not found');
+          navigate('/');
+        }
+      }
+    } catch (error) {
+      toast.error('Failed to load product');
+      navigate('/');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddressChange = (field: string, value: string) => {
     setAddress(prev => ({ ...prev, [field]: value }));
   };
 
   const handleOrder = async () => {
-    if (!address.street || !address.city || !address.state || !address.zipCode) {
+    if (!address.street || !address.city || !address.state || !address.zipCode || !address.country) {
       toast.error('Please fill in all address fields');
       return;
     }
 
     setIsLoading(true);
     
-    // Simulate order processing
-    setTimeout(() => {
-      toast.success('Order placed successfully!');
-      navigate('/');
+    try {
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          product: {
+            id: product._id,
+            title: product.title,
+            category: product.category,
+            price: product.price,
+            imageUrl: product.imageUrl
+          },
+          address,
+          paymentMethod,
+          total: product.price
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Order placed successfully!');
+        navigate('/my-orders');
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Failed to place order');
+      }
+    } catch (error) {
+      toast.error('Network error. Please try again.');
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
+
+  if (userLoading || loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) return null;
 
@@ -110,6 +173,7 @@ const Buy = () => {
                 value={address.street}
                 onChange={(e) => handleAddressChange('street', e.target.value)}
                 className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                required
               />
               <div className="grid grid-cols-2 gap-4">
                 <Input
@@ -117,12 +181,14 @@ const Buy = () => {
                   value={address.city}
                   onChange={(e) => handleAddressChange('city', e.target.value)}
                   className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                  required
                 />
                 <Input
                   placeholder="State"
                   value={address.state}
                   onChange={(e) => handleAddressChange('state', e.target.value)}
                   className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                  required
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -131,12 +197,14 @@ const Buy = () => {
                   value={address.zipCode}
                   onChange={(e) => handleAddressChange('zipCode', e.target.value)}
                   className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                  required
                 />
                 <Input
                   placeholder="Country"
                   value={address.country}
                   onChange={(e) => handleAddressChange('country', e.target.value)}
                   className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                  required
                 />
               </div>
             </CardContent>

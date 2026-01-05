@@ -16,22 +16,24 @@ const AdminDashboardOverview = () => {
 
   const fetchStats = async () => {
     try {
-      const [usersRes, productsRes, categoriesRes] = await Promise.all([
+      const [usersRes, productsRes, categoriesRes, ordersRes] = await Promise.all([
         fetch('/api/users'),
         fetch('/api/products'),
-        fetch('/api/categories')
+        fetch('/api/categories'),
+        fetch('/api/orders')
       ]);
 
-      const [users, products, categories] = await Promise.all([
+      const [users, products, categories, orders] = await Promise.all([
         usersRes.ok ? usersRes.json() : [],
         productsRes.ok ? productsRes.json() : [],
-        categoriesRes.ok ? categoriesRes.json() : []
+        categoriesRes.ok ? categoriesRes.json() : [],
+        ordersRes.ok ? ordersRes.json() : []
       ]);
 
       setStats({
         users: users.length,
         products: products.length,
-        orders: 0,
+        orders: orders.length,
         categories: categories.length
       });
     } catch (error) {

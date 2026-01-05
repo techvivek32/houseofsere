@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Instagram, Phone, User, ChevronDown, LogOut } from "lucide-react";
+import { Menu, X, Instagram, Phone, User, ChevronDown, LogOut, UserCircle, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "@/contexts/UserContext";
 import {
@@ -8,6 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
 const navLinks = [{
@@ -71,6 +72,15 @@ const Header = () => {
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+                    <UserCircle className="h-4 w-4 mr-2" />
+                    My Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/my-orders')} className="cursor-pointer">
+                    <ShoppingBag className="h-4 w-4 mr-2" />
+                    My Orders
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                     <LogOut className="h-4 w-4 mr-2" />
                     Logout
@@ -124,6 +134,24 @@ const Header = () => {
                     <div className="text-sm tracking-widest text-white/90 py-2">
                       Welcome, {user.firstName}
                     </div>
+                    <button
+                      onClick={() => {
+                        navigate('/profile');
+                        setIsOpen(false);
+                      }}
+                      className="block text-sm tracking-widest text-white/90 hover:text-primary transition-colors duration-300 py-2 text-left"
+                    >
+                      MY PROFILE
+                    </button>
+                    <button
+                      onClick={() => {
+                        navigate('/my-orders');
+                        setIsOpen(false);
+                      }}
+                      className="block text-sm tracking-widest text-white/90 hover:text-primary transition-colors duration-300 py-2 text-left"
+                    >
+                      MY ORDERS
+                    </button>
                     <button
                       onClick={() => {
                         handleLogout();
