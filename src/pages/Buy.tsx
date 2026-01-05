@@ -25,6 +25,7 @@ const Buy = () => {
     country: ''
   });
   const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [quantity, setQuantity] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -67,6 +68,15 @@ const Buy = () => {
     setAddress(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleQuantityChange = (change: number) => {
+    setQuantity(prev => Math.max(1, prev + change));
+  };
+
+  const getTotalAmount = () => {
+    const price = parseFloat(product.price.replace(/[^0-9]/g, '')) || 0;
+    return price * quantity;
+  };
+
   const handleOrder = async () => {
     if (!address.street || !address.city || !address.state || !address.zipCode || !address.country) {
       toast.error('Please fill in all address fields');
@@ -88,11 +98,12 @@ const Buy = () => {
             title: product.title,
             category: product.category,
             price: product.price,
-            imageUrl: product.imageUrl
+            imageUrl: product.imageUrl,
+            quantity: quantity
           },
           address,
           paymentMethod,
-          total: product.price
+          total: getTotalAmount()
         })
       });
 
@@ -124,119 +135,149 @@ const Buy = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-amber-100 p-4">
-      <button
-        onClick={() => navigate('/')}
-        className="mb-6 inline-flex items-center gap-2 text-amber-700 hover:text-amber-800 transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Home
-      </button>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-amber-800">Complete Your Order</h1>
+        <button
+          onClick={() => navigate('/')}
+          className="inline-flex items-center gap-2 text-amber-700 hover:text-amber-800 transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Home
+        </button>
+      </div>
 
-      <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="w-full grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* Product Details */}
-        <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle className="text-2xl font-serif text-amber-800">Product Details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="aspect-square overflow-hidden rounded-lg">
-              <img
-                src={product.imageUrl || '/placeholder.svg'}
-                alt={product.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div>
-              <h3 className="text-xl font-serif text-gray-800">{product.title}</h3>
-              <p className="text-amber-600 font-medium">{product.category}</p>
-              <p className="text-2xl font-bold text-amber-800 mt-2">₹{product.price}</p>
-              {product.description && (
-                <p className="text-gray-600 mt-2">{product.description}</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Order Form */}
-        <div className="space-y-6">
-          {/* Address */}
-          <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+        <div className="xl:col-span-1">
+          <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm h-fit">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl font-serif text-amber-800">
-                <MapPin className="h-5 w-5" />
-                Delivery Address
-              </CardTitle>
+              <CardTitle className="text-2xl font-serif text-amber-800">Product Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Input
-                placeholder="Street Address"
-                value={address.street}
-                onChange={(e) => handleAddressChange('street', e.target.value)}
-                className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
-                required
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  placeholder="City"
-                  value={address.city}
-                  onChange={(e) => handleAddressChange('city', e.target.value)}
-                  className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
-                  required
-                />
-                <Input
-                  placeholder="State"
-                  value={address.state}
-                  onChange={(e) => handleAddressChange('state', e.target.value)}
-                  className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
-                  required
+              <div className="aspect-square overflow-hidden rounded-lg">
+                <img
+                  src={product.imageUrl || '/placeholder.svg'}
+                  alt={product.title}
+                  className="w-full h-full object-cover"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  placeholder="ZIP Code"
-                  value={address.zipCode}
-                  onChange={(e) => handleAddressChange('zipCode', e.target.value)}
-                  className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
-                  required
-                />
-                <Input
-                  placeholder="Country"
-                  value={address.country}
-                  onChange={(e) => handleAddressChange('country', e.target.value)}
-                  className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
-                  required
-                />
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-xl font-serif text-gray-800">{product.title}</h3>
+                  <p className="text-amber-600 font-medium">{product.category}</p>
+                  <p className="text-2xl font-bold text-amber-800 mt-2">₹{product.price}</p>
+                  {product.description && (
+                    <p className="text-gray-600 mt-2">{product.description}</p>
+                  )}
+                </div>
+                
+                {/* Quantity Counter */}
+                <div className="text-right">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => handleQuantityChange(-1)}
+                      className="w-8 h-8 rounded-full border border-amber-300 flex items-center justify-center text-amber-600 hover:bg-amber-50"
+                    >
+                      -
+                    </button>
+                    <span className="text-lg font-medium w-8 text-center">{quantity}</span>
+                    <button
+                      onClick={() => handleQuantityChange(1)}
+                      className="w-8 h-8 rounded-full border border-amber-300 flex items-center justify-center text-amber-600 hover:bg-amber-50"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
+        </div>
 
-          {/* Payment Method */}
-          <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-xl font-serif text-amber-800">
-                <CreditCard className="h-5 w-5" />
-                Payment Method
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="cod" id="cod" />
-                  <Label htmlFor="cod" className="flex items-center gap-2">
-                    <Truck className="h-4 w-4" />
-                    Cash on Delivery
-                  </Label>
+        {/* Order Form */}
+        <div className="xl:col-span-2 space-y-6">
+          {/* Address and Payment in Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Address */}
+            <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl font-serif text-amber-800">
+                  <MapPin className="h-5 w-5" />
+                  Delivery Address
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input
+                  placeholder="Street Address"
+                  value={address.street}
+                  onChange={(e) => handleAddressChange('street', e.target.value)}
+                  className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                  required
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    placeholder="City"
+                    value={address.city}
+                    onChange={(e) => handleAddressChange('city', e.target.value)}
+                    className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                    required
+                  />
+                  <Input
+                    placeholder="State"
+                    value={address.state}
+                    onChange={(e) => handleAddressChange('state', e.target.value)}
+                    className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                    required
+                  />
                 </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="online" id="online" />
-                  <Label htmlFor="online" className="flex items-center gap-2">
-                    <CreditCard className="h-4 w-4" />
-                    Online Payment
-                  </Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    placeholder="ZIP Code"
+                    value={address.zipCode}
+                    onChange={(e) => handleAddressChange('zipCode', e.target.value)}
+                    className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                    required
+                  />
+                  <Input
+                    placeholder="Country"
+                    value={address.country}
+                    onChange={(e) => handleAddressChange('country', e.target.value)}
+                    className="border-amber-200 focus:border-amber-400 focus:ring-amber-400"
+                    required
+                  />
                 </div>
-              </RadioGroup>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Payment Method */}
+            <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl font-serif text-amber-800">
+                  <CreditCard className="h-5 w-5" />
+                  Payment Method
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="cod" id="cod" />
+                    <Label htmlFor="cod" className="flex items-center gap-2">
+                      <Truck className="h-4 w-4" />
+                      Cash on Delivery
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="online" id="online" />
+                    <Label htmlFor="online" className="flex items-center gap-2">
+                      <CreditCard className="h-4 w-4" />
+                      Online Payment
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Order Summary */}
           <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
@@ -249,13 +290,21 @@ const Buy = () => {
                 <span>₹{product.price}</span>
               </div>
               <div className="flex justify-between">
+                <span>Quantity:</span>
+                <span>{quantity}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>₹{getTotalAmount()}</span>
+              </div>
+              <div className="flex justify-between">
                 <span>Delivery:</span>
                 <span>Free</span>
               </div>
               <div className="border-t pt-4">
                 <div className="flex justify-between font-bold text-lg">
                   <span>Total:</span>
-                  <span>₹{product.price}</span>
+                  <span>₹{getTotalAmount()}</span>
                 </div>
               </div>
               <Button
