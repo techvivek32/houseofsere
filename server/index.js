@@ -610,6 +610,32 @@ app.post('/api/settings', upload.single('heroVideo'), async (req, res) => {
   }
 });
 
+app.delete('/api/settings/delete-video', async (req, res) => {
+  try {
+    const settings = db.collection('settings');
+    
+    // Get current video filename to delete file
+    const currentSettings = await settings.findOne({ type: 'global' });
+    if (currentSettings?.heroVideo) {
+      const filePath = path.join('uploads', currentSettings.heroVideo);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+    
+    // Remove video from database
+    await settings.updateOne(
+      { type: 'global' },
+      { $unset: { heroVideo: '' }, $set: { updatedAt: new Date() } }
+    );
+    
+    res.json({ message: 'Video deleted successfully' });
+  } catch (error) {
+    console.error('Video deletion error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Start server
 connectDB().then(() => {
   app.listen(PORT, () => {

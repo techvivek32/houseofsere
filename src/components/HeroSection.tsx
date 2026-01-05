@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
 import storeShowcase from "@/assets/store-showcase.png";
 import heroVideo from "@/assets/hero-video.mp4";
 
@@ -10,18 +11,43 @@ const handleExternalLink = (url: string) => {
 };
 
 const HeroSection = () => {
+  const [videoSrc, setVideoSrc] = useState(heroVideo);
+  const [videoKey, setVideoKey] = useState(0);
+
+  useEffect(() => {
+    fetchHeroVideo();
+  }, []);
+
+  const fetchHeroVideo = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      if (response.ok) {
+        const settings = await response.json();
+        if (settings.heroVideo) {
+          setVideoSrc(`/uploads/${settings.heroVideo}?t=${Date.now()}`);
+          setVideoKey(prev => prev + 1);
+        } else {
+          setVideoSrc(heroVideo);
+          setVideoKey(prev => prev + 1);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch hero video:', error);
+    }
+  };
   return (
     <>
       {/* Video Hero Section */}
       <section className="relative w-full h-screen">
         <video
+          key={videoKey}
           autoPlay
           muted
           loop
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
         >
-          <source src={heroVideo} type="video/mp4" />
+          <source src={videoSrc} type="video/mp4" />
         </video>
         {/* Overlay for better text visibility */}
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-background/90" />
