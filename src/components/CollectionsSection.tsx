@@ -1,6 +1,8 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
-import { MessageCircle, Instagram } from "lucide-react";
+import { MessageCircle, Instagram, ShoppingCart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
 
 const WHATSAPP_URL = "https://api.whatsapp.com/send/?phone=7096748749";
 const INSTAGRAM_URL = "https://www.instagram.com/house_ofsere/";
@@ -14,6 +16,16 @@ const CollectionsSection = () => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
+  const { user } = useUser();
+
+  const handleBuyClick = (product: any) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    navigate('/buy', { state: { product } });
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -93,6 +105,14 @@ const CollectionsSection = () => {
                   <span className="text-sm font-medium bg-primary/20 px-2 py-1 rounded">Price: {product.price}</span>
                 </div>
                 <div className="flex gap-2">
+                  <button
+                    onClick={() => handleBuyClick(product)}
+                    className="flex-1 flex items-center justify-center gap-2 bg-primary text-primary-foreground py-2 px-3 rounded-sm text-sm hover:bg-primary/80 transition-colors"
+                    aria-label={`Buy ${product.title}`}
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    Buy
+                  </button>
                   <a
                     href={getWhatsAppLink(product.title)}
                     target="_blank"
