@@ -8,6 +8,7 @@ import {
   ShoppingBag, 
   Package, 
   FolderOpen, 
+  Settings, 
   LogOut 
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -29,6 +30,7 @@ const AdminLayout = () => {
     { path: '/admin/orders', label: 'Orders', icon: ShoppingBag },
     { path: '/admin/products', label: 'Products', icon: Package },
     { path: '/admin/categories', label: 'Categories', icon: FolderOpen },
+    { path: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 
   return (

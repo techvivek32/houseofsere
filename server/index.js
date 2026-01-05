@@ -4,6 +4,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { MongoClient } from 'mongodb';
 import dotenv from 'dotenv';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -20,6 +23,36 @@ let db;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+// Ensure uploads directory exists
+const uploadsDir = 'uploads';
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+app.use('/uploads', express.static('uploads'));
+
+// Multer configuration for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    cb(null, 'hero-video' + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({ 
+  storage: storage,
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('video/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only video files are allowed'));
+    }
+  },
+  limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit
+});
 
 // Connect to MongoDB
 async function connectDB() {
@@ -522,6 +555,57 @@ app.put('/api/products/:id', async (req, res) => {
     }
   } catch (error) {
     console.error('Product update error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Settings routes
+app.get('/api/settings', async (req, res) => {
+  try {
+    const settings = db.collection('settings');
+    const result = await settings.findOne({ type: 'global' });
+    
+    if (!result) {
+      // Return default settings if none exist
+      return res.json({
+        shippingCost: '0.00',
+        heroVideo: null
+      });
+    }
+    
+    res.json({
+      shippingCost: result.shippingCost || '0.00',
+      heroVideo: result.heroVideo || null
+    });
+  } catch (error) {
+    console.error('Settings fetch error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+app.post('/api/settings', upload.single('heroVideo'), async (req, res) => {
+  try {
+    const { shippingCost } = req.body;
+    const settings = db.collection('settings');
+    
+    const updateData = {
+      shippingCost,
+      updatedAt: new Date()
+    };
+    
+    if (req.file) {
+      updateData.heroVideo = req.file.filename;
+    }
+    
+    const result = await settings.updateOne(
+      { type: 'global' },
+      { $set: updateData },
+      { upsert: true }
+    );
+    
+    res.json({ message: 'Settings saved successfully' });
+  } catch (error) {
+    console.error('Settings save error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
