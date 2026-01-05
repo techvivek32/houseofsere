@@ -15,6 +15,7 @@ const Buy = () => {
   const { user, isLoading: userLoading } = useUser();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [shippingCost, setShippingCost] = useState(0);
 
   const [address, setAddress] = useState({
     street: '',
@@ -36,6 +37,7 @@ const Buy = () => {
     }
     if (productId) {
       fetchProduct();
+      fetchShippingCost();
     } else {
       toast.error('Product not found');
       navigate('/');
@@ -63,6 +65,18 @@ const Buy = () => {
     }
   };
 
+  const fetchShippingCost = async () => {
+    try {
+      const response = await fetch('/api/settings');
+      if (response.ok) {
+        const settings = await response.json();
+        setShippingCost(parseFloat(settings.shippingCost) || 0);
+      }
+    } catch (error) {
+      console.error('Failed to fetch shipping cost:', error);
+    }
+  };
+
   const handleAddressChange = (field: string, value: string) => {
     setAddress(prev => ({ ...prev, [field]: value }));
   };
@@ -72,6 +86,11 @@ const Buy = () => {
   };
 
   const getTotalAmount = () => {
+    const price = parseFloat(product.price.replace(/[^0-9]/g, '')) || 0;
+    return (price * quantity) + shippingCost;
+  };
+
+  const getSubtotal = () => {
     const price = parseFloat(product.price.replace(/[^0-9]/g, '')) || 0;
     return price * quantity;
   };
@@ -284,15 +303,11 @@ const Buy = () => {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">₹{getTotalAmount()}</span>
+                  <span className="font-medium">₹{getSubtotal()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Shipping</span>
-                  <span className="font-medium text-green-600">Free</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tax</span>
-                  <span className="font-medium">₹0</span>
+                  <span className="font-medium">{shippingCost > 0 ? `₹${shippingCost}` : 'Free'}</span>
                 </div>
                 <div className="border-t pt-3">
                   <div className="flex justify-between">
