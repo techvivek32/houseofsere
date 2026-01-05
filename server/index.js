@@ -211,6 +211,25 @@ app.get('/api/orders/user/:userId', async (req, res) => {
   }
 });
 
+app.delete('/api/orders/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ObjectId } = await import('mongodb');
+    const orders = db.collection('orders');
+    
+    const result = await orders.deleteOne({ _id: new ObjectId(id) });
+    
+    if (result.deletedCount === 1) {
+      res.json({ message: 'Order deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'Order not found' });
+    }
+  } catch (error) {
+    console.error('Order deletion error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // User signup route
 app.post('/api/users/signup', async (req, res) => {
   try {
