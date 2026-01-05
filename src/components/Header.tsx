@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Instagram, Phone } from "lucide-react";
+import { Menu, X, Instagram, Phone, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const navLinks = [{
   name: "HOME",
@@ -28,21 +29,34 @@ const handleExternalLink = (url: string) => {
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
   
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
       <nav className="container mx-auto px-4 lg:px-8">
         {/* Desktop Navigation - Centered */}
-        <div className="hidden lg:flex items-center justify-center h-20 gap-12">
-          {navLinks.map(link => (
-            <a 
-              key={link.name} 
-              href={link.href} 
-              className="text-sm tracking-[0.2em] text-white/90 hover:text-primary transition-colors duration-300 drop-shadow-md"
+        <div className="hidden lg:flex items-center justify-between h-20">
+          <div className="flex-1" />
+          <div className="flex items-center gap-12">
+            {navLinks.map(link => (
+              <a 
+                key={link.name} 
+                href={link.href} 
+                className="text-sm tracking-[0.2em] text-white/90 hover:text-primary transition-colors duration-300 drop-shadow-md"
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
+          <div className="flex-1 flex justify-end">
+            <button
+              onClick={() => navigate('/login')}
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground border border-primary hover:bg-transparent hover:text-primary shadow-luxury rounded-sm px-4 py-2 text-sm transition-all duration-300"
             >
-              {link.name}
-            </a>
-          ))}
+              <User className="h-4 w-4" />
+              Login
+            </button>
+          </div>
         </div>
 
         {/* Mobile Header */}
@@ -75,6 +89,15 @@ const Header = () => {
                     {link.name}
                   </a>
                 ))}
+                <button
+                  onClick={() => {
+                    navigate('/login');
+                    setIsOpen(false);
+                  }}
+                  className="block text-sm tracking-widest text-white/90 hover:text-primary transition-colors duration-300 py-2 text-left"
+                >
+                  LOGIN
+                </button>
                 <div className="pt-4 flex items-center gap-4">
                   <button 
                     onClick={() => {

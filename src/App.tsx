@@ -7,6 +7,9 @@ import { HelmetProvider } from "react-helmet-async";
 import { AdminProvider } from "@/contexts/AdminContext";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import ResetPassword from "./pages/ResetPassword";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -23,6 +26,9 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route 
                 path="/admin/dashboard" 
