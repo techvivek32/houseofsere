@@ -12,8 +12,13 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import ResetPassword from "./pages/ResetPassword";
 import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
 import Buy from "./pages/Buy";
+import AdminLayout from "@/components/AdminLayout";
+import AdminDashboardOverview from "./pages/admin/AdminDashboardOverview";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminProducts from "./pages/admin/AdminProducts";
+import AdminCategories from "./pages/admin/AdminCategories";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const queryClient = new QueryClient();
@@ -35,13 +40,19 @@ const App = () => (
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route 
-                  path="/admin/dashboard" 
+                  path="/admin" 
                   element={
                     <ProtectedRoute>
-                      <AdminDashboard />
+                      <AdminLayout />
                     </ProtectedRoute>
-                  } 
-                />
+                  }
+                >
+                  <Route path="dashboard" element={<AdminDashboardOverview />} />
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route path="orders" element={<AdminOrders />} />
+                  <Route path="products" element={<AdminProducts />} />
+                  <Route path="categories" element={<AdminCategories />} />
+                </Route>
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

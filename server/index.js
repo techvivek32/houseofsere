@@ -143,6 +143,20 @@ app.get('/api/users/verify', verifyUserToken, async (req, res) => {
   }
 });
 
+// Get all users (admin only)
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = db.collection('users');
+    const result = await users.find({}, { 
+      projection: { password: 0 } // Exclude password field
+    }).toArray();
+    res.json(result);
+  } catch (error) {
+    console.error('Users fetch error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // User signup route
 app.post('/api/users/signup', async (req, res) => {
   try {
