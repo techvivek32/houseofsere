@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Instagram, Phone, User } from "lucide-react";
+import { Menu, X, Instagram, Phone, User, ChevronDown, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navLinks = [{
   name: "HOME",
@@ -30,6 +37,11 @@ const handleExternalLink = (url: string) => {
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const { user, logout } = useUser();
+  
+  const handleLogout = () => {
+    logout();
+  };
   
   return (
     <header className="fixed top-0 left-0 right-0 z-50">
@@ -49,13 +61,31 @@ const Header = () => {
             ))}
           </div>
           <div className="flex-1 flex justify-end">
-            <button
-              onClick={() => navigate('/login')}
-              className="inline-flex items-center gap-2 bg-primary text-primary-foreground border border-primary hover:bg-transparent hover:text-primary shadow-luxury rounded-sm px-4 py-2 text-sm transition-all duration-300"
-            >
-              <User className="h-4 w-4" />
-              Login
-            </button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="inline-flex items-center gap-2 bg-primary text-primary-foreground border border-primary hover:bg-transparent hover:text-primary shadow-luxury rounded-sm px-4 py-2 text-sm transition-all duration-300">
+                    <User className="h-4 w-4" />
+                    {user.firstName}
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <button
+                onClick={() => navigate('/login')}
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground border border-primary hover:bg-transparent hover:text-primary shadow-luxury rounded-sm px-4 py-2 text-sm transition-all duration-300"
+              >
+                <User className="h-4 w-4" />
+                Login
+              </button>
+            )}
           </div>
         </div>
 
@@ -89,15 +119,32 @@ const Header = () => {
                     {link.name}
                   </a>
                 ))}
-                <button
-                  onClick={() => {
-                    navigate('/login');
-                    setIsOpen(false);
-                  }}
-                  className="block text-sm tracking-widest text-white/90 hover:text-primary transition-colors duration-300 py-2 text-left"
-                >
-                  LOGIN
-                </button>
+                {user ? (
+                  <>
+                    <div className="text-sm tracking-widest text-white/90 py-2">
+                      Welcome, {user.firstName}
+                    </div>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsOpen(false);
+                      }}
+                      className="block text-sm tracking-widest text-white/90 hover:text-primary transition-colors duration-300 py-2 text-left"
+                    >
+                      LOGOUT
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      navigate('/login');
+                      setIsOpen(false);
+                    }}
+                    className="block text-sm tracking-widest text-white/90 hover:text-primary transition-colors duration-300 py-2 text-left"
+                  >
+                    LOGIN
+                  </button>
+                )}
                 <div className="pt-4 flex items-center gap-4">
                   <button 
                     onClick={() => {

@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { User, Mail, Phone, Lock, Eye, EyeOff, ArrowLeft, Check, X } from 'lucide-react';
+import { useUser } from '@/contexts/UserContext';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,14 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { user } = useUser();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const passwordsMatch = formData.password && formData.confirmPassword && formData.password === formData.confirmPassword;
   const passwordsDontMatch = formData.confirmPassword && formData.password !== formData.confirmPassword;

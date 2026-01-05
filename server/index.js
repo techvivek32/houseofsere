@@ -79,8 +79,8 @@ app.post('/api/admin/login', async (req, res) => {
   }
 });
 
-// Verify token middleware
-const verifyToken = (req, res, next) => {
+// Verify admin token middleware
+const verifyAdminToken = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   
   if (!token) {
@@ -96,9 +96,51 @@ const verifyToken = (req, res, next) => {
   }
 };
 
+// Verify user token middleware
+const verifyUserToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ message: 'No token provided' });
+  }
+  
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: 'Invalid token' });
+  }
+};
+
 // Protected admin routes
-app.get('/api/admin/verify', verifyToken, (req, res) => {
+app.get('/api/admin/verify', verifyAdminToken, (req, res) => {
   res.json({ message: 'Token valid' });
+});
+
+// Protected user routes
+app.get('/api/users/verify', verifyUserToken, async (req, res) => {
+  try {
+    const { ObjectId } = await import('mongodb');
+    const users = db.collection('users');
+    const user = await users.findOne({ _id: new ObjectId(req.userId) });
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.json({ 
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      }
+    });
+  } catch (error) {
+    console.error('User verify error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 // User signup route
@@ -134,6 +176,46 @@ app.post('/api/users/signup', async (req, res) => {
     });
   } catch (error) {
     console.error('Signup error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// User login route
+app.post('/api/users/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+    
+    const users = db.collection('users');
+    const user = await users.findOne({ email });
+    
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '24h' });
+    
+    res.json({ 
+      token, 
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email
+      },
+      message: 'Login successful' 
+    });
+  } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });
