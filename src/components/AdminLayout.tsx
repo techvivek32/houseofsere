@@ -34,11 +34,11 @@ const AdminLayout = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg flex flex-col">
+      <div className="w-64 bg-white shadow-lg flex flex-col h-screen sticky top-0">
         <div className="p-6">
           <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
         </div>
-        <nav className="mt-6 flex-1 flex flex-col">
+        <nav className="flex-1 flex flex-col overflow-y-auto">
           <div className="flex-1">
             {sidebarItems.map((item) => {
               const Icon = item.icon;
@@ -57,19 +57,23 @@ const AdminLayout = () => {
               );
             })}
           </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center px-6 py-3 text-left text-red-600 hover:bg-red-50 mt-auto mb-4"
-          >
-            <LogOut className="h-5 w-5 mr-3" />
-            Logout
-          </button>
+          <div className="border-t border-gray-200 p-4 mt-auto">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center px-2 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              <LogOut className="h-5 w-5 mr-3" />
+              Logout
+            </button>
+          </div>
         </nav>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-8">
-        <Outlet />
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-8">
+          <Outlet />
+        </div>
       </div>
     </div>
   );

@@ -11,6 +11,13 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState('all');
+  const [editingUser, setEditingUser] = useState(null);
+  const [editData, setEditData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: ''
+  });
   const [stats, setStats] = useState({
     total: 0,
     admins: 0,
@@ -90,7 +97,9 @@ const AdminUsers = () => {
       });
 
       if (response.ok) {
-        setUsers(users.filter(user => user._id !== userId));
+        const updatedUsers = users.filter(user => user._id !== userId);
+        setUsers(updatedUsers);
+        calculateStats(updatedUsers);
         toast.success('User deleted successfully');
       } else {
         toast.error('Failed to delete user');
@@ -100,29 +109,44 @@ const AdminUsers = () => {
     }
   };
 
-  const toggleUserRole = async (userId, currentRole) => {
+  const handleEditUser = (user) => {
+    setEditingUser(user._id);
+    setEditData({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phone: user.phone || ''
+    });
+  };
+
+  const handleSaveEdit = async (userId) => {
     try {
-      const response = await fetch(`/api/users/${userId}/role`, {
+      const response = await fetch(`/api/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ isAdmin: !currentRole })
+        body: JSON.stringify(editData)
       });
 
       if (response.ok) {
         const updatedUsers = users.map(user =>
-          user._id === userId ? { ...user, isAdmin: !currentRole } : user
+          user._id === userId ? { ...user, ...editData } : user
         );
         setUsers(updatedUsers);
-        calculateStats(updatedUsers);
-        toast.success(`User role updated to ${!currentRole ? 'Admin' : 'Customer'}`);
+        setEditingUser(null);
+        toast.success('User updated successfully');
       } else {
-        toast.error('Failed to update user role');
+        toast.error('Failed to update user');
       }
     } catch (error) {
-      toast.error('Error updating user role');
+      toast.error('Error updating user');
     }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+    setEditData({ firstName: '', lastName: '', email: '', phone: '' });
   };
 
   if (loading) {
@@ -237,58 +261,106 @@ const AdminUsers = () => {
                       <Users className="h-6 w-6 text-blue-600" />
                     </div>
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-gray-900">
-                          {user.firstName} {user.lastName}
-                        </h3>
-                        {user.isAdmin && (
-                          <span className="inline-block px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">
-                            Admin
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-4 mt-1">
-                        <div className="flex items-center gap-1 text-sm text-gray-600">
-                          <Mail className="h-3 w-3" />
-                          {user.email}
-                        </div>
-                        {user.phone && (
-                          <div className="flex items-center gap-1 text-sm text-gray-600">
-                            <Phone className="h-3 w-3" />
-                            {user.phone}
+                      {editingUser === user._id ? (
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <Input
+                              value={editData.firstName}
+                              onChange={(e) => setEditData({...editData, firstName: e.target.value})}
+                              placeholder="First Name"
+                              className="flex-1 h-8"
+                            />
+                            <Input
+                              value={editData.lastName}
+                              onChange={(e) => setEditData({...editData, lastName: e.target.value})}
+                              placeholder="Last Name"
+                              className="flex-1 h-8"
+                            />
                           </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                        <Calendar className="h-3 w-3" />
-                        Joined {new Date(user.createdAt).toLocaleDateString()}
-                      </div>
+                          <Input
+                            value={editData.email}
+                            onChange={(e) => setEditData({...editData, email: e.target.value})}
+                            placeholder="Email"
+                            className="h-8"
+                          />
+                          <Input
+                            value={editData.phone}
+                            onChange={(e) => setEditData({...editData, phone: e.target.value})}
+                            placeholder="Phone"
+                            className="h-8"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold text-gray-900">
+                              {user.firstName} {user.lastName}
+                            </h3>
+                            {user.isAdmin && (
+                              <span className="inline-block px-2 py-1 bg-purple-100 text-purple-800 text-xs font-medium rounded-full">
+                                Admin
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-4 mt-1">
+                            <div className="flex items-center gap-1 text-sm text-gray-600">
+                              <Mail className="h-3 w-3" />
+                              {user.email}
+                            </div>
+                            {user.phone && (
+                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                                <Phone className="h-3 w-3" />
+                                {user.phone}
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                            <Calendar className="h-3 w-3" />
+                            Joined {new Date(user.createdAt).toLocaleDateString()}
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      <Eye className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="text-gray-600 hover:text-gray-700"
-                    >
-                      <Edit className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteUser(user._id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                    {editingUser === user._id ? (
+                      <>
+                        <Button
+                          onClick={() => handleSaveEdit(user._id)}
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          onClick={handleCancelEdit}
+                          variant="outline"
+                          size="sm"
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          onClick={() => handleEditUser(user)}
+                          variant="outline"
+                          size="sm"
+                          className="text-gray-600 hover:text-gray-700"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          onClick={() => handleDeleteUser(user._id)}
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               ))}

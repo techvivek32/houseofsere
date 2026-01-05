@@ -157,6 +157,59 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+// Update user (admin only)
+app.put('/api/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, email, phone } = req.body;
+    const { ObjectId } = await import('mongodb');
+    
+    const users = db.collection('users');
+    
+    const result = await users.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          firstName,
+          lastName,
+          email,
+          phone,
+          updatedAt: new Date()
+        }
+      }
+    );
+    
+    if (result.matchedCount === 1) {
+      res.json({ message: 'User updated successfully' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('User update error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Delete user (admin only)
+app.delete('/api/users/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ObjectId } = await import('mongodb');
+    const users = db.collection('users');
+    
+    const result = await users.deleteOne({ _id: new ObjectId(id) });
+    
+    if (result.deletedCount === 1) {
+      res.json({ message: 'User deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    console.error('User deletion error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Orders routes
 app.post('/api/orders', async (req, res) => {
   try {
