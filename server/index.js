@@ -101,6 +101,43 @@ app.get('/api/admin/verify', verifyToken, (req, res) => {
   res.json({ message: 'Token valid' });
 });
 
+// User signup route
+app.post('/api/users/signup', async (req, res) => {
+  try {
+    const { firstName, lastName, email, phone, password } = req.body;
+    
+    if (!firstName || !lastName || !email || !phone || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+    
+    const users = db.collection('users');
+    const existingUser = await users.findOne({ email });
+    
+    if (existingUser) {
+      return res.status(409).json({ message: 'Email already exists' });
+    }
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const result = await users.insertOne({
+      firstName,
+      lastName,
+      email,
+      phone,
+      password: hashedPassword,
+      createdAt: new Date()
+    });
+    
+    res.status(201).json({ 
+      message: 'User created successfully',
+      userId: result.insertedId 
+    });
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // Categories routes
 app.post('/api/categories/bulk', async (req, res) => {
   try {

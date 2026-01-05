@@ -37,12 +37,34 @@ const SignUp = () => {
 
     setIsLoading(true);
 
-    // Simulate sign up process
-    setTimeout(() => {
-      toast.success('Account created successfully!');
-      navigate('/login');
+    try {
+      const response = await fetch('http://localhost:8080/api/users/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Account created successfully!');
+        navigate('/login');
+      } else {
+        toast.error(data.message || 'Signup failed');
+      }
+    } catch (error) {
+      toast.error('Network error. Please try again.');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
