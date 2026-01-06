@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "server": "node server/index.js",
     "seed:admin": "node server/seedAdmin.js",
-    "frontend": "vite"
+    "frontend": "vite",
+    "vercel-build": "npm run build"
   },
   "dependencies": {
     "@fontsource/playfair-display": "^5.2.8",

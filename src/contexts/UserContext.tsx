@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
@@ -31,7 +33,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyToken = async (token: string) => {
     try {
-      const response = await fetch('http://localhost:8080/api/users/verify', {
+      const response = await fetch(`${API_URL}/api/users/verify`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -53,7 +55,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('http://localhost:8080/api/users/login', {
+      const response = await fetch(`${API_URL}/api/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

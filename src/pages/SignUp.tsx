@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -47,7 +49,7 @@ const SignUp = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8080/api/users/signup', {
+      const response = await fetch(`${API_URL}/api/users/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

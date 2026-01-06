@@ -1,3 +1,5 @@
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface AdminContextType {
@@ -25,7 +27,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const token = localStorage.getItem('adminToken');
     if (token) {
       // Verify token with server
-      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/admin/verify`, {
+      fetch(`${API_URL}/api/admin/verify`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
@@ -51,7 +53,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/admin/login`, {
+      const response = await fetch(`${API_URL}/api/admin/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
